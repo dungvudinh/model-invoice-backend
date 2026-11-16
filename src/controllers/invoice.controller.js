@@ -53,13 +53,26 @@ async function resolveInvoiceModels(modelIds, models) {
 }
 
 // Dựng danh sách dòng hóa đơn từ bảng giá: customer -> USD, freelancer -> VND
-async function buildItems(type, modelIds) {
+async function buildItems(type, modelIds, excludeInvoiceId) {
   if (!Array.isArray(modelIds) || modelIds.length === 0) throw new AppError('modelIds phải là mảng không rỗng');
   const uniqueIds = [...new Set(modelIds.map(String))];
   if (uniqueIds.length !== modelIds.length) throw new AppError('modelIds bị trùng');
 
   const models = await ModelItem.find({ _id: { $in: uniqueIds } }).populate('category');
   if (models.length !== uniqueIds.length) throw new AppError('Có model không tồn tại', 404);
+
+  // A model may be used once in a customer invoice and once in a freelancer
+  // invoice, but never in two invoices of the same type.
+  const existingInvoiceFilter = {
+    type,
+    'items.model': { $in: uniqueIds },
+  };
+  if (excludeInvoiceId) existingInvoiceFilter._id = { $ne: excludeInvoiceId };
+  const existingInvoice = await Invoice.findOne(existingInvoiceFilter).select('invoiceNumber');
+  if (existingInvoice) {
+    throw new AppError(`Model đã nằm trong hóa đơn ${type === 'customer' ? 'khách hàng' : 'freelancer'} ${existingInvoice.invoiceNumber}`, 409);
+  }
+
   const byId = new Map(models.map((m) => [String(m._id), m]));
 
   const cur = CURRENCY_BY_TYPE[type];
@@ -108,7 +121,7 @@ exports.update = asyncHandler(async (req, res) => {
   if (req.body.to !== undefined) doc.to = req.body.to;
   if (req.body.models !== undefined || req.body.modelIds !== undefined) {
     const ids = await resolveInvoiceModels(req.body.modelIds, req.body.models);
-    doc.set(await buildItems(doc.type, ids));
+    doc.set(await buildItems(doc.type, ids, doc._id));
   }
   await doc.save();
   res.json(await serializeWithModels(doc));
@@ -158,7 +171,7 @@ exports.recalculate = asyncHandler(async (req, res) => {
   const doc = await Invoice.findById(req.params.id);
   if (!doc) throw new AppError('Không tìm thấy hóa đơn', 404);
   if (doc.isPaid) throw new AppError('Hóa đơn đã thanh toán, không thể tính lại', 409);
-  const built = await buildItems(doc.type, doc.items.map((i) => i.model));
+  const built = await buildItems(doc.type, doc.items.map((i) => i.model), doc._id);
   doc.set(built);
   await doc.save();
   res.json(await serializeWithModels(doc));
