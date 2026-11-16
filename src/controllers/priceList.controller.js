@@ -3,7 +3,7 @@ const ModelItem = require('../models/Model');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
-const pick = (b) => ({ name: b.name, new: b.new, similar1: b.similar1, similar2: b.similar2, modular: b.modular, bonus: b.bonus });
+const pick = (b) => ({ name: b.name, new: b.new, similar1: b.similar1, similar2: b.similar2, modular: b.modular, modularSimilar: b.modularSimilar, bonus: b.bonus });
 
 exports.create = asyncHandler(async (req, res) => {
   const doc = await PriceList.create(pick(req.body));

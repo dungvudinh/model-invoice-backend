@@ -16,6 +16,7 @@ const priceListSchema = new mongoose.Schema(
     similar1: { type: priceSchema, required: true },
     similar2: { type: priceSchema, required: true },
     modular: { type: priceSchema, required: true },
+    modularSimilar: { type: priceSchema, required: true, default: () => ({ usd: 0, vnd: 0 }) },
     bonus: { type: priceSchema, required: true },
   },
   { timestamps: true }

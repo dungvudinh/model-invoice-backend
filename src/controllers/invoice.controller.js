@@ -15,7 +15,7 @@ function serializeInvoice(doc, models = []) {
     const model = byId.get(String(item.model));
     return {
       id: String(item.model), name: item.modelName, type: item.category,
-      status: ({ new: 'New', similar1: 'Similar1', similar2: 'Similar2', modular: 'Modular' })[item.status] || item.status,
+      status: ({ new: 'New', similar1: 'Similar1', similar2: 'Similar2', modular: 'Modular', modularsimilar: 'Modular Similar' })[item.status] || item.status,
       milestone: model?.milestone ?? 0, deadline: model?.deadline || 'OK', staff: model?.staff || '',
       clientPaid: Boolean(model?.payment?.customerPaid), freelancerPaid: Boolean(model?.payment?.freelancerPaid),
       price: item.unitPrice, bonus: item.bonus,
