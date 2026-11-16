@@ -15,7 +15,7 @@ router.patch('/models/:id/payment', md.updatePayment);
 
 // Hóa đơn
 router.route('/invoices').get(inv.list).post(inv.create);
-router.route('/invoices/:id').get(inv.get).delete(inv.remove);
+router.route('/invoices/:id').get(inv.get).put(inv.update).delete(inv.remove);
 router.patch('/invoices/:id/pay', inv.setPaid);
 router.post('/invoices/:id/recalculate', inv.recalculate);
 

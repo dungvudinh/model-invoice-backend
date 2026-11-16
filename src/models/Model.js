@@ -6,6 +6,10 @@ const modelSchema = new mongoose.Schema(
     name: { type: String, required: [true, 'Thiếu tên model'], trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'PriceList', required: [true, 'Thiếu loại model'] },
     status: { type: String, enum: STATUSES, required: [true, 'Thiếu trạng thái'] },
+    // Fields used by the payment-management frontend.
+    milestone: { type: Number, min: 0, default: 0 },
+    deadline: { type: String, enum: ['OK', 'Miss'], default: 'OK' },
+    staff: { type: String, trim: true, default: 'Chưa phân công' },
     // Có áp dụng Bonus hay không; số tiền Bonus lấy từ bảng giá theo loại
     hasBonus: { type: Boolean, default: false },
     // Tình trạng thanh toán: khách hàng đã trả công ty chưa, công ty đã trả freelancer chưa

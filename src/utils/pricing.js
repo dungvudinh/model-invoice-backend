@@ -34,6 +34,12 @@ function serializeModel(doc) {
       bonus: getBonus(pl, doc.hasBonus, 'vnd'),
     };
   }
+  // Keep the API convenient for the existing frontend contract.
+  obj.id = String(obj._id);
+  obj.type = pl?.name || obj.type;
+  obj.status = ({ new: 'New', similar1: 'Similar1', similar2: 'Similar2', modular: 'Modular' })[obj.status] || obj.status;
+  obj.clientPaid = Boolean(obj.payment?.customerPaid);
+  obj.freelancerPaid = Boolean(obj.payment?.freelancerPaid);
   return obj;
 }
 
